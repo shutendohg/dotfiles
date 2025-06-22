@@ -2,57 +2,49 @@ name: Dotfiles CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 jobs:
   test-dotfiles:
-    runs-on: ubuntu-24.04        # ★ 1) 24.04 ランナーを明示
+    runs-on: ubuntu-24.04
 
     steps:
-      # 0) ソース取得
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      # 1) chezmoi を ~/.local/bin へインストール
-      - name: Install chezmoi
-        run: |
-          curl -fsLS get.chezmoi.io | bash -s -- -b ~/.local/bin
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+    - name: Install chezmoi
+      run: |
+        curl -fsLS get.chezmoi.io | bash -s -- -b ~/.local/bin
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      # 2) dotfiles をワークスペースから適用
-      - name: Apply dotfiles with chezmoi
-        run: |
-          chezmoi init --apply .
+    - name: Apply dotfiles with chezmoi
+      run: chezmoi init --apply .
 
-      # 3) Neovim v0.11-dev の Linux64 バイナリを取得
-      - name: Install Neovim nightly
-        run: |
-          curl -L https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz \
-               -o nvim.tar.gz
-          tar xzf nvim.tar.gz
-          echo "$PWD/nvim-linux64/bin" >> "$GITHUB_PATH"
+    # ← ★ nightly AppImage 方式
+    - name: Install Neovim nightly (AppImage)
+      run: |
+        curl -L https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage -o nvim.appimage
+        chmod u+x nvim.appimage
+        ./nvim.appimage --appimage-extract
+        echo "$PWD/squashfs-root/usr/bin" >> "$GITHUB_PATH"
 
-      # 4) （オプション）checkhealth に必要な依存ツールを入れる
-      - name: Install common deps (ripgrep/fd)
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y ripgrep fd-find
+    - name: Install deps (ripgrep, fd)
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y ripgrep fd-find
 
-      # 5) プラグイン同期 (Lazy を headless 呼び出し)
-      - name: Lazy sync
-        run: nvim --headless "+Lazy! sync" +qa
+    - name: Lazy sync
+      run: nvim --headless "+Lazy! sync" +qa
 
-      # 6) :checkhealth で ERROR が無いか検査
-      - name: Run :checkhealth
-        run: |
-          nvim --headless "+checkhealth" "+qa" > checkhealth.log || true
-          if grep -q "ERROR" checkhealth.log; then
-            echo "::error:: Neovim health check failed"
-            cat checkhealth.log
-            exit 1
-          fi
+    - name: Run :checkhealth
+      run: |
+        nvim --headless "+checkhealth" "+qa" >checkhealth.log || true
+        if grep -q "ERROR" checkhealth.log; then
+          echo "::error::Neovim health check failed"
           cat checkhealth.log
+          exit 1
+        fi
+        cat checkhealth.log
 
-      # 7) 最終スモークテスト
-      - name: Headless launch with user config
-        run: nvim --headless -c "quit"
+    - name: Final smoke test
+      run: nvim --headless -c "quit"
