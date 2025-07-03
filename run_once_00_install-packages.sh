@@ -32,6 +32,6 @@ if ! command -v docker &>/dev/null; then
 fi
 
 # make fish the default shell (if not already)
-if [ "$SHELL" != "/usr/bin/fish" ]; then
+if [ -z "${CI:-}" ] && [ "$SHELL" != "/usr/bin/fish" ]; then
 	chsh -s /usr/bin/fish "$USER"
 fi
