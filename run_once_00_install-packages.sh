@@ -3,7 +3,7 @@ set -euo pipefail
 
 sudo apt-get update -y
 sudo apt-get install -y \
-	neovim fish peco ripgrep fd-find dhclient \
+	neovim fish peco ripgrep fd-find \
 	build-essential libssl-dev curl zip unzip golang-go go-md2man \
 	ca-certificates gnupg lsb-release
 
