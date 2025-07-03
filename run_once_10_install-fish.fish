@@ -13,7 +13,7 @@ set PLUGS \
     'decors/fish-ghq' \
     'jethrokuan/z' \
     '0rax/fish-bd' \
-    'oh-my-fish/theme-neolambda'
+    'ipatch/theme-neolambda'
 
 for p in $PLUGS
     fisher install $p
