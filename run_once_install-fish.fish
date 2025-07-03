@@ -1,6 +1,5 @@
 #!/usr/bin/env fish
-# run_once_install-fish.fish
-# ※ fish には bash の set -e 相当が無いので省略
+# fish には bash の `set -e` 相当が無いので書かない
 
 # fisher 本体
 if not functions -q fisher
@@ -8,7 +7,7 @@ if not functions -q fisher
     fisher install jorgebucaran/fisher
 end
 
-# ==== プラグイン & テーマ ====
+# === Plugins & Theme ===
 set PLUGS \
     'oh-my-fish/plugin-peco' \
     'decors/fish-ghq' \

@@ -1,4 +1,3 @@
-dot_config/nvim/lazy/**
-dot_config/omf/cache/**
-dot_config/omf/logs/**
-dot_config/nvim/.cache/**
+private_dot_config/nvim/lazy/**
+private_dot_config/nvim/.cache/**
+private_dot_config/private_fish/functions/**
