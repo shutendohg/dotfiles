@@ -7,32 +7,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install chezmoi
+    - name: chezmoi apply
       run: |
         curl -fsLS get.chezmoi.io | bash -s -- -b ~/.local/bin
-        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        chezmoi init --apply .
 
-    - name: Apply dotfiles
-      run: chezmoi init --apply .
-
-    # ---- Neovim nightly 安定取得 ----
-    - name: Install Neovim nightly (PPA)
+    - name: Neovim nightly + deps
       run: |
-        sudo apt-get update -y
         sudo add-apt-repository -y ppa:neovim-ppa/unstable
         sudo apt-get update -y
-        sudo apt-get install -y neovim ripgrep fd-find
-        nvim --version
+        sudo apt-get install -y neovim ripgrep fd-find fish peco
 
     - name: Lazy sync
       run: nvim --headless "+Lazy! sync" +qa
 
-    - name: CheckHealth
+    - name: Health
       run: |
-        nvim --headless "+checkhealth" +qa > checkhealth.log || true
-        if grep -q "ERROR" checkhealth.log; then
-          echo "::error::health check failed"
-          cat checkhealth.log
-          exit 1
-        fi
-        cat checkhealth.log
+        nvim --headless "+checkhealth" "+qa" >log || true
+        grep -q ERROR log && { cat log; exit 1; } || cat log
