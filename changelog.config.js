@@ -1,6 +1,6 @@
 module.exports = {
-    disableEmoji: false,
-    format: '{type}: {subject}',
+    disableEmoji: true,
+    format: '{type}: {emoji}{subject}',
     list: ['test', 'feat', 'fix', 'chore', 'docs', 'refactor', 'style', 'ci', 'perf'],
     maxMessageLength: 64,
     minMessageLength: 3,
