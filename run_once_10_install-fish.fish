@@ -1,7 +1,4 @@
 #!/usr/bin/env fish
-# fish には bash の `set -e` 相当が無いので書かない
-
-# fisher 本体
 if not functions -q fisher
     curl -fsSL https://git.io/fisher | source
     fisher install jorgebucaran/fisher
