@@ -18,6 +18,11 @@ end
 
 set -U fish_user_paths $HOME/go/bin $fish_user_paths
 
+set -l npm_bin (command npm prefix -g 2>/dev/null)/bin
+if test -d $npm_bin; and not contains $npm_bin $fish_user_paths
+    set -U fish_user_paths $npm_bin $fish_user_paths
+end
+
 if status --is-login
     if not pgrep -x ssh-agent > /dev/null
         eval (ssh-agent -c)
@@ -26,6 +31,8 @@ if status --is-login
         ssh-add ~/.ssh/id_ed25519 &>/dev/null
     end
 end
+
+
 
 alias vim nvim
 alias vi nvim
