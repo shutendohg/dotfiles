@@ -3,7 +3,7 @@
 [user]
 	email = shutendohg@gmail.com
 	name = shutendohg
-	signingkey = /home/shutendohg/.ssh/id_ed25519.pub
+	signingkey = /home/shutendohg/.ssh/id_ed25519
 [gpg]
 	format = ssh
 [commit]
