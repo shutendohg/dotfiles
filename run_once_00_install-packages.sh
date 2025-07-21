@@ -5,7 +5,8 @@ sudo apt-get update -y
 sudo apt-get install -y \
     neovim fish peco ripgrep fd-find \
     build-essential libssl-dev curl zip unzip golang-go go-md2man \
-    ca-certificates gnupg lsb-release tree cmake ninja-build luarocks
+    ca-certificates gnupg lsb-release tree cmake ninja-build luarocks \
+    tmux
 
 # ---------- Go & ghq ----------
 export GOPATH="$HOME/go"

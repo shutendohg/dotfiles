@@ -2,3 +2,4 @@
 rust = "stable"
 "cargo:wrkflw" = "latest"
 node = "lts"
+python = "3.12"
