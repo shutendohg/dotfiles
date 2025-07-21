@@ -1,0 +1,5 @@
+#!/usr/bin/env fish
+# tmux split-window -v -p 30 
+tmux split-window -v
+tmux resize-pane -D 10
+tmux select-pane -t 1
