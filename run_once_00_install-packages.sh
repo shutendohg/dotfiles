@@ -39,3 +39,5 @@ fi
 if ! command -v mise &>/dev/null; then
     curl https://mise.run | sh # Add to ~/.local/bin/mise
 fi
+
+export PATH="$HOME/.local/bin:$PATH"

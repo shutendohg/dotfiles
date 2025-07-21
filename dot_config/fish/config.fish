@@ -1,6 +1,8 @@
-if status is-interactive
-    # Commands to run in interactive sessions can go here
+if not contains -- "$HOME/.local/bin" $fish_user_paths
+    set -Ua fish_user_paths $HOME/.local/bin
 end
+mise activate fish | source
+
 
 set GHQ_SELECTOR peco
 
@@ -32,10 +34,6 @@ if status --is-login
     end
 end
 
-if type -q mise
-    status --is-login; and eval (~/.local/bin/mise activate fish) 
-    mise activate fish | source
-end
 
 alias vim nvim
 alias vi nvim
