@@ -6,4 +6,6 @@ if not type -q node
 end
 npm install -g git-cz
 
-mise install
+if type -q mise 
+    mise install
+end

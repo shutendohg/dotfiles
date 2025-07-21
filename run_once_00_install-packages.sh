@@ -35,3 +35,7 @@ fi
 if [ -z "${CI:-}" ] && [ "$SHELL" != "/usr/bin/fish" ]; then
     chsh -s /usr/bin/fish "$USER"
 fi
+# ---------- mise ----------
+if ! command -v mise &>/dev/null; then
+    curl https://mise.run | sh # Add to ~/.local/bin/mise
+fi
