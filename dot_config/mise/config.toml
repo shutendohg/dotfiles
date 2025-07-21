@@ -1,0 +1,4 @@
+[tools]
+rust = "stable"
+"cargo:wrkflw" = "latest"
+node = "lts"

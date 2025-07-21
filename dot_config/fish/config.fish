@@ -32,7 +32,8 @@ if status --is-login
     end
 end
 
-
+status --is-login; and eval (~/.local/bin/mise activate fish) 
+mise activate fish | source
 
 alias vim nvim
 alias vi nvim

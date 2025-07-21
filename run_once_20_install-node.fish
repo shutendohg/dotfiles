@@ -5,3 +5,5 @@ if not type -q node
     nvm alias default node
 end
 npm install -g git-cz
+
+mise install
