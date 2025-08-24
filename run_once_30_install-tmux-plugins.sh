@@ -1,4 +1,3 @@
-# ~/.local/share/chezmoi/run_once_30_install-tmux-plugins.sh
 #!/usr/bin/env bash
 set -euo pipefail
 
