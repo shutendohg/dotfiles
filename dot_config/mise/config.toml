@@ -1,5 +1,8 @@
 [tools]
 rust = "stable"
 "cargo:wrkflw" = "latest"
+"cargo:du-dust" = "latest"
+"cargo:procs" = "latest"
+"cargo:bottom" = "latest"
 node = "lts"
 python = "3.12"

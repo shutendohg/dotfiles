@@ -37,3 +37,7 @@ end
 
 alias vim nvim
 alias vi nvim
+alias ls eza
+alias cat batcat
+alias fd fdfind
+alias dust du

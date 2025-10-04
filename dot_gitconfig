@@ -10,3 +10,9 @@
 	gpgsign = true
 [core]
 	editor = nvim
+
+[pager]
+	diff = delta
+	show = delta
+	log = delta
+	reflog = delta
