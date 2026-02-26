@@ -41,3 +41,7 @@ alias ls eza
 alias cat batcat
 alias fd fdfind
 alias dust du
+
+# GPG signing
+set -gx GPG_TTY (tty)
+gpg-connect-agent updatestartuptty /bye >/dev/null
