@@ -3,9 +3,10 @@
 [user]
 	email = shutendohg@gmail.com
 	name = shutendohg
-	signingkey = /home/shutendohg/.ssh/id_ed25519
+	signingkey = 5B4F31350635FF2C1058E0818B914D280BDB4520
 [gpg]
-	format = ssh
+	program = gpg
+	format = openpgp
 [commit]
 	gpgsign = true
 [core]
@@ -16,3 +17,5 @@
 	show = delta
 	log = delta
 	reflog = delta
+[tag]
+	gpgsign = true
