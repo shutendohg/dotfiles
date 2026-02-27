@@ -1,6 +1,5 @@
 -- cache init.lua
 vim.loader.enable()
-
 -- basic config
 vim.o.filetype = "plugin", "indent", "on"
 vim.o.display = "lastline"
@@ -53,6 +52,11 @@ vim.opt.clipboard:append("unnamed")
 vim.opt.clipboard:append("unnamedplus")
 vim.o.undofile = false
 vim.api.nvim_set_keymap("i", "jj", "<ESC>", { noremap = true, silent = true })
+-- Common IME outputs (small tsu + j in full/half width)
+local ime_esc = { "っｊ", "っj", "ｯｊ", "ｯj" }
+for _, lhs in ipairs(ime_esc) do
+	vim.keymap.set("i", lhs, "<Esc>", { noremap = true, silent = true })
+end
 vim.api.nvim_set_keymap("n", "cw", ":close<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "L", ":bnext<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "H", ":bprevious<CR>", { noremap = true, silent = true })
