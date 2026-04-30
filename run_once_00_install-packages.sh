@@ -7,7 +7,7 @@ sudo apt-get install -y \
     build-essential libssl-dev curl zip unzip golang-go go-md2man \
     ca-certificates gnupg lsb-release tree cmake ninja-build luarocks \
     tmux gh \
-    eza bat fd-find git-delta hyperfine lnav
+    eza bat fd-find git-delta hyperfine lnav tshark
 
 # ---------- Go & ghq ----------
 export GOPATH="$HOME/go"
