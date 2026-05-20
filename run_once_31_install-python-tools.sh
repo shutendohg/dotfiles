@@ -13,3 +13,4 @@ if ! command -v pipx >/dev/null 2>&1; then
 fi
 
 pipx install --force powerline-status
+pipx install --force --include-deps trzsz
