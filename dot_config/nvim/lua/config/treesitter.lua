@@ -12,9 +12,12 @@ local ensure_installed = {
 	"markdown",
 }
 
-if vim.fn.has("nvim-0.12") == 0 then
+-- Decide by the installed plugin, not only by the Nvim version, so that an old `master`
+-- checkout keeps working until `:Lazy sync` switches it to the branch in the spec.
+local has_configs, configs = pcall(require, "nvim-treesitter.configs")
+if has_configs then
 	-- nvim-treesitter `master` branch (Nvim 0.10 / 0.11)
-	require("nvim-treesitter.configs").setup({
+	configs.setup({
 		ensure_installed = ensure_installed,
 		sync_install = false, -- If set true, wait time happens
 		auto_install = true, -- If uninstall langs are used, installed automatically
