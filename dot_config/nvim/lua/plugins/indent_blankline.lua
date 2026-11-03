@@ -1,7 +1,10 @@
 return {
 	{
 		"lukas-reineke/indent-blankline.nvim",
-		event = { "BufReadPost", "BufNewFile" },
+		-- Load right after the first screen is drawn instead of while the first file is
+		-- being opened: the scope (and rainbow-delimiters) parse the whole buffer with
+		-- treesitter, which takes tens of ms for big grammars such as cpp.
+		event = "VeryLazy",
 		main = "ibl",
 		dependencies = { "HiPhish/rainbow-delimiters.nvim" },
 		config = function()
@@ -47,6 +50,14 @@ return {
 			vim.g.rainbow_delimiters = {
 				highlight = highlight,
 			}
+
+			-- rainbow-delimiters attaches on FileType, which already happened for the
+			-- files opened before it was loaded (e.g. the ones given on the command line)
+			for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+				if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype == "" and vim.bo[buf].filetype ~= "" then
+					require("rainbow-delimiters").enable(buf)
+				end
+			end
 		end,
 	},
 }
