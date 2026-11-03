@@ -1,5 +1,18 @@
 -- cache init.lua
 vim.loader.enable()
+
+-- encoding
+-- Keep this before the spell settings: setting 'encoding' (even to the same value)
+-- reloads every spell file, so the spell file used to be parsed twice at startup.
+vim.o.encoding = "utf-8"
+vim.scriptencoding = "utf-8"
+
+-- No plugin in this config uses the Python 3 remote-plugin provider (pynvim), but the
+-- built-in python ftplugin calls has('python3'), which probes every python executable
+-- and costs ~100ms+ each time Neovim opens a Python file. Remove this line if you ever
+-- need `:python3` or a pynvim based plugin.
+vim.g.loaded_python3_provider = 0
+
 -- basic config
 vim.o.filetype = "plugin", "indent", "on"
 vim.o.display = "lastline"
@@ -20,10 +33,6 @@ vim.o.syntax = "enable"
 
 -- Highlight setting of the rows
 vim.o.cursorline = true
-
--- encoding
-vim.o.encoding = "utf-8"
-vim.scriptencoding = "utf-8"
 
 -- visual for airline
 vim.o.ambiwidth = "double"
