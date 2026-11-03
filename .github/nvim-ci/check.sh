@@ -182,7 +182,7 @@ main() {
 		# where the parsers bundled with Neovim are (lazy.nvim resets 'runtimepath')
 		nvim --headless -u NONE -i NONE --cmd "lua dofile([[$here/ci.lua]])" -c "lua NvimCI.info()" -c qall 2>&1
 		echo
-		run_nvim sync 900 "+Lazy! sync" "+lua NvimCI.lazy_report()" +qall
+		run_nvim sync 900 -c "Lazy! sync" -c "lua NvimCI.sync()"
 		check_output sync
 		;;
 	startup)

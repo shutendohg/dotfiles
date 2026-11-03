@@ -79,8 +79,8 @@ function M.info()
 end
 
 --- Reports the plugins that are not installed or have a failed lazy.nvim task
---- (clone, checkout, docs, build, ...). Run after `:Lazy! sync`.
-function M.lazy_report()
+--- (clone, checkout, docs, build, ...).
+local function lazy_report()
 	local ok, Config = pcall(require, "lazy.core.config")
 	if not ok or vim.tbl_isempty(Config.plugins or {}) then
 		log_error("lazy.nvim has no plugins (did init.lua fail before require('lazy').setup()?)")
@@ -119,6 +119,13 @@ function M.lazy_report()
 		)
 	end
 	log(("done: sync (%d plugins)"):format(#names))
+end
+
+--- Run with -c after `-c "Lazy! sync"`: reports the failed tasks once Nvim has started and quits.
+--- (Not with `+qall`: while a -c command runs, Nvim prefixes the error messages printed when
+--- it exits, e.g. by mason.nvim aborting its installations, with "Error in command line:".)
+function M.sync()
+	after_startup(lazy_report)
 end
 
 --- Loads every plugin, like a session in which all of them got used.
