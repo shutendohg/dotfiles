@@ -23,6 +23,12 @@ mkdir -p "$logdir"
 export LC_ALL=C.UTF-8
 export TERM=${TERM:-xterm-256color}
 
+# Like a machine Nvim has run on before: Nvim only lists the 'runtimepath'
+# directories that existed at startup, so on a fresh machine nvim-treesitter's
+# healthcheck creates its install directory and then reports it as "not in
+# runtimepath".
+mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site"
+
 # Messages that Neovim prints only when something failed:
 #   E5113: Lua chunk: ...       any error number
 #   Error in .../init.lua:      ("Error detected while processing" before Nvim 0.12)
@@ -32,6 +38,11 @@ export TERM=${TERM:-xterm-256color}
 #   [nvim-ci] ERROR: ...        ci.lua, e.g. for every vim.notify(..., ERROR)
 # Not "stack traceback:": vim.deprecate() prints one with its warning.
 error_re='(^|[^[:alnum:]_])E[0-9]+: |Error (in |detected while processing |executing )|Lua (:command )?callback:|vim\.schedule callback:|Luv (thread|callback, thread):|Failed to run `|\[nvim-ci\] ERROR'
+# Where a message starts. Nvim does not end its messages with a newline in
+# --headless mode, so they can be glued to the previous one.
+message_start_re='Error (in|detected while processing|executing) |Lua (:command )?callback:|vim\.schedule callback:|Failed to run `'
+# git's progress output (lazy.nvim prints it) only goes to the log file
+progress_re='(Counting|Compressing|Receiving|Resolving|Enumerating) (objects|deltas): |Updating files: '
 
 check=${1:-}
 fail=0
@@ -61,10 +72,13 @@ run_nvim() { # <log name> <timeout> <nvim args>...
 	log=$logdir/$1.log
 	shift 2
 	echo "+ nvim --headless $*"
-	status=0
 	# stdbuf: lazy.nvim writes its progress to stdout, Nvim its messages to stderr
-	timeout --kill-after=30 "$timeout" stdbuf -oL \
-		nvim --headless --cmd "lua dofile([[$here/ci.lua]])" "$@" 2>&1 | tee "$log" || status=$?
+	{
+		timeout --kill-after=30 "$timeout" stdbuf -oL \
+			nvim --headless --cmd "lua dofile([[$here/ci.lua]])" "$@" 2>&1 |
+			tee "$log" | grep --line-buffered -vE -- "$progress_re"
+		status=${PIPESTATUS[0]}
+	} || true
 	echo
 }
 
@@ -75,9 +89,18 @@ find_errors() { # [<from>]
 	if [ -n "$from" ] && ! grep -qF -- "$from" "$log"; then
 		from=''
 	fi
-	sed 's/\x1b\[[0-9;]*[[:alpha:]]//g' "$log" |
+	sed -E -e 's/\x1b\[[0-9;]*[[:alpha:]]//g' -e 's/(.)(\[nvim-ci\] )/\1\n\2/g' "$log" |
+		sed -E "/^\[nvim-ci\] /!s/(.)($message_start_re)/\1\n\2/g" |
 		awk -v from="$from" 'from == "" || started { print; next } index($0, from) { started = 1 }' |
 		grep -E -- "$error_re" || true
+}
+
+# Error lines without lazy.nvim's "[plugin] task | " prefix, repeated ones
+# counted.
+summarize() {
+	sed -E 's/^\[[^]]+\] +[[:alnum:]_.-]+ \| //' |
+		awk '!($0 in n) { order[++k] = $0 } { n[$0]++ }
+			END { for (i = 1; i <= k; i++) print (n[order[i]] > 1 ? n[order[i]] "x " : "") order[i] }'
 }
 
 # Fails if Neovim did not exit normally, the check did not get to its end or
@@ -92,9 +115,14 @@ check_output() { # <done marker> [<from>]
 	if ! grep -qF "[nvim-ci] done: $1" "$log"; then
 		error "The check did not finish: no \"[nvim-ci] done: $1\" line in the output"
 	fi
-	errors=$(find_errors "${2:-}")
+	errors=$(find_errors "${2:-}" | summarize)
 	if [ -n "$errors" ]; then
-		error "Neovim reported errors ($(wc -l <<<"$errors") lines, see the output above):"$'\n'"$(head -n 30 <<<"$errors")"
+		local n
+		n=$(wc -l <<<"$errors")
+		if [ "$n" -gt 30 ]; then
+			errors=$(head -n 30 <<<"$errors")$'\n'"... and $((n - 30)) more lines, see the output above"
+		fi
+		error "Neovim reported errors:"$'\n'"$errors"
 	fi
 }
 

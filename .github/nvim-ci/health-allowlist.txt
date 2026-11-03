@@ -5,11 +5,9 @@
 # e.g.
 #   vim.health / Terminal: Graphics protocol: not supported by this terminal.
 # Every other ERROR in the report fails the ":checkhealth" step, so keep the
-# patterns specific. (check.sh sets a UTF-8 locale and $TERM, so the locale
-# and terminfo errors of vim.health do not show up in the first place.)
+# patterns specific, and prefer fixing the environment in check.sh (which
+# already sets a UTF-8 locale and $TERM for the locale and terminfo errors of
+# vim.health).
 
 # Headless Nvim has no terminal that could answer the graphics protocol query.
 ^vim\.health / Terminal: Graphics protocol: not supported by this terminal\.$
-
-# lazy.nvim needs luarocks (or hererocks) only for plugins that ship a rockspec.
-^lazy / luarocks:

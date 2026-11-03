@@ -8,9 +8,15 @@
 local M = {}
 _G.NvimCI = M
 
-local function log(msg)
-	-- print() (not io.stderr) so that the line is not glued to the previous message
-	print("[nvim-ci] " .. msg)
+--- Writes "[nvim-ci] <line>" lines to stderr. (Not with print(): in --headless mode Nvim does
+--- not end its messages with a newline, so they would be glued together.)
+---@param ... string
+local function log(...)
+	local lines = {}
+	for i = 1, select("#", ...) do
+		lines[i] = "[nvim-ci] " .. select(i, ...)
+	end
+	io.stderr:write("\n" .. table.concat(lines, "\n") .. "\n")
 end
 
 local function log_error(msg)
@@ -18,10 +24,12 @@ local function log_error(msg)
 end
 
 -- vim.notify(ERROR) messages have no fixed wording (lazy.nvim's "Failed to run `config` for ...",
--- "Failed to load `plugins.foo`", ...), so tag them.
+-- "Failed to load `plugins.foo`", ...), so tag them. Not while Nvim exits: background jobs are
+-- killed then, e.g. mason.nvim reports the installations it aborts as failed. (Errors in
+-- VimLeavePre autocmds are still reported by Nvim itself.)
 local notify = vim.notify
 vim.notify = function(msg, level, opts)
-	if level == vim.log.levels.ERROR then
+	if level == vim.log.levels.ERROR and vim.v.exiting == vim.NIL then
 		log_error("vim.notify: " .. tostring(msg):match("^[^\n]*"))
 	end
 	return notify(msg, level, opts)
@@ -81,19 +89,34 @@ function M.lazy_report()
 	local Plugin = require("lazy.core.plugin")
 	local names = vim.tbl_keys(Config.plugins)
 	table.sort(names)
+	local missing = {} ---@type string[]
+	local failed = {} ---@type table<string, string[]> task name -> plugins
 	for _, name in ipairs(names) do
 		local plugin = Config.plugins[name]
 		if not plugin._.installed then
-			log_error(("lazy.nvim: %s is not installed"):format(name))
+			missing[#missing + 1] = name
 		elseif Plugin.has_errors(plugin) then
-			local failed = {}
 			for _, task in ipairs(plugin._.tasks or {}) do
 				if task:has_errors() then
-					failed[#failed + 1] = task.name
+					failed[task.name] = failed[task.name] or {}
+					table.insert(failed[task.name], name)
 				end
 			end
-			log_error(("lazy.nvim: %s: task failed: %s"):format(name, table.concat(failed, ", ")))
 		end
+	end
+	if #missing > 0 then
+		log_error("lazy.nvim: not installed: " .. table.concat(missing, ", "))
+	end
+	local tasks = vim.tbl_keys(failed)
+	table.sort(tasks)
+	for _, task in ipairs(tasks) do
+		log_error(
+			("lazy.nvim: task `%s` failed for %d plugin(s): %s"):format(
+				task,
+				#failed[task],
+				table.concat(failed[task], ", ")
+			)
+		)
 	end
 	log(("done: sync (%d plugins)"):format(#names))
 end
