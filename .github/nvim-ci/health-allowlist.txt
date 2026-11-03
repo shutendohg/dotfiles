@@ -1,0 +1,13 @@
+# :checkhealth errors that are expected in CI and do not mean the config is broken.
+#
+# Each line is an extended regular expression (grep -E) matched against
+#   <healthcheck> / <section>: <first line of the message>
+# e.g.
+#   vim.health / Terminal: Graphics protocol: not supported by this terminal.
+# Every other ERROR in the report fails the ":checkhealth" step, so keep the
+# patterns specific, and prefer fixing the environment in check.sh (which
+# already sets a UTF-8 locale and $TERM for the locale and terminfo errors of
+# vim.health).
+
+# Headless Nvim has no terminal that could answer the graphics protocol query.
+^vim\.health / Terminal: Graphics protocol: not supported by this terminal\.$
