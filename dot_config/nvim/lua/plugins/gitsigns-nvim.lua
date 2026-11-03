@@ -1,6 +1,9 @@
 return {
     "lewis6991/gitsigns.nvim",
-    event = "BufReadPost",
+    -- Load right after the first screen is drawn instead of while the first file is
+    -- being read. gitsigns attaches to the buffers that are already open on setup
+    -- (and its signs are computed asynchronously anyway).
+    event = "VeryLazy",
     config = function()
         require("gitsigns").setup({
             signs = {
