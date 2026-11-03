@@ -5,7 +5,6 @@ vim.loader.enable()
 -- Keep this before the spell settings: setting 'encoding' (even to the same value)
 -- reloads every spell file, so the spell file used to be parsed twice at startup.
 vim.o.encoding = "utf-8"
-vim.scriptencoding = "utf-8"
 
 -- No plugin in this config uses the Python 3 remote-plugin provider (pynvim), but the
 -- built-in python ftplugin calls has('python3'), which probes every python executable
@@ -14,22 +13,19 @@ vim.scriptencoding = "utf-8"
 vim.g.loaded_python3_provider = 0
 
 -- basic config
-vim.o.filetype = "plugin", "indent", "on"
+-- `filetype plugin indent on` and `syntax enable` are Neovim defaults (:help nvim-defaults)
 vim.o.display = "lastline"
 vim.o.number = true
 vim.o.ruler = true
 vim.o.list = true
--- >- means tab
-vim.o.listchars = "tab:>-", "trail:*", "nbsp:+"
+-- show tabs as ">-", trailing spaces as "*", non-breaking spaces as "+"
+vim.o.listchars = "tab:>-,trail:*,nbsp:+"
 
 -- language
 -- vim.api.nvim_exec ('language en_US', true)
 -- spell checking
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us", "cjk" }
-
--- syntax highlight on
-vim.o.syntax = "enable"
 
 -- Highlight setting of the rows
 vim.o.cursorline = true
