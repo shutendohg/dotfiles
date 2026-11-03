@@ -55,8 +55,14 @@ return {
         vim.api.nvim_create_autocmd("VimEnter", {
             callback = function()
                 local api = require("nvim-tree.api")
-                -- If it's already open, do nothing; otherwise open without taking focus
-                -- Using `toggle({ focus = false })` ensures we don't focus the tree.
+                -- If it's already open, do nothing: with `nvim <dir>` the tree has
+                -- already taken over the directory window (hijack_directories), and
+                -- toggling would close it again.
+                if api.tree.is_visible() then
+                    return
+                end
+                -- Otherwise open it; `toggle({ focus = false })` keeps the focus on
+                -- the editing window.
                 api.tree.toggle({ focus = false })
             end,
         })
@@ -64,7 +70,7 @@ return {
         ---------------------------------------------------------------------------
         -- Close NvimTree reliably on quit
         -- - If quitting and only "file + NvimTree" remain, close the tree first.
-        -- - If somehow only NvimTree is left, exit Neovim.
+        -- - If closing a file window leaves only NvimTree, exit Neovim.
         -- Floating windows are ignored in counts to avoid false positives.
         ---------------------------------------------------------------------------
         local function is_tree_buf(buf)
@@ -100,14 +106,46 @@ return {
             end,
         })
 
-        -- 2) If only the tree is left, exit Neovim
-        vim.api.nvim_create_autocmd("BufEnter", {
-            nested = true,
-            callback = function()
-                local n, tree_win = normal_wins_and_tree_win()
-                if n == 1 and tree_win then
-                    vim.cmd("quit")
+        -- 2) If closing a file window leaves only the tree, exit Neovim
+        -- Only a file window that was just closed counts: the tree is also the only
+        -- window when it takes over a directory buffer (`nvim .`, `:e <dir>`), and
+        -- that must not quit.
+        local file_win_closed = false
+
+        vim.api.nvim_create_autocmd("WinClosed", {
+            callback = function(args)
+                local win = tonumber(args.match)
+                if not (win and vim.api.nvim_win_is_valid(win)) then
+                    return
                 end
+                local floating = vim.api.nvim_win_get_config(win).relative ~= ""
+                if floating or is_tree_buf(vim.api.nvim_win_get_buf(win)) then
+                    return
+                end
+                file_win_closed = true
+                -- Reset on the next tick: only the BufEnter caused by this close (the
+                -- cursor moving to the remaining window) should act on it.
+                vim.schedule(function()
+                    file_win_closed = false
+                end)
+            end,
+        })
+
+        vim.api.nvim_create_autocmd("BufEnter", {
+            callback = function()
+                if not file_win_closed then
+                    return
+                end
+                file_win_closed = false
+                -- Check on the next tick: nvim-tree may still be moving windows
+                -- around (a file opened in the tree window is moved to a new split by
+                -- closing that window and reopening the file).
+                vim.schedule(function()
+                    local n, tree_win = normal_wins_and_tree_win()
+                    if n == 1 and tree_win then
+                        vim.cmd("quit")
+                    end
+                end)
             end,
         })
     end,

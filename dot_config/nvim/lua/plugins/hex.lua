@@ -1,7 +1,10 @@
 return {
 	{
 		"RaafatTurki/hex.nvim",
-		lazy = false,
+		-- Loaded before the first file is read; lazy.nvim replays BufReadPre for the
+		-- autocmds hex.nvim creates, so binary files are still detected.
+		event = "BufReadPre",
+		cmd = { "HexDump", "HexAssemble", "HexToggle" },
 		config = function()
 			local hex = require("hex")
 			hex.setup()

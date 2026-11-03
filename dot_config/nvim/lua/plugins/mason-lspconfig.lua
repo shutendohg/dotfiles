@@ -1,11 +1,16 @@
 return {
     "williamboman/mason-lspconfig.nvim",
     version = "^1.0.0",
-    lazy = false,
+    -- Set up LSP right after the first screen is drawn instead of before it.
+    -- vim.lsp.enable() also attaches the servers to buffers that are already open.
+    event = "VeryLazy",
+    dependencies = {
+        "williamboman/mason.nvim", -- its config runs require("mason").setup() first
+        "neovim/nvim-lspconfig",
+        "hrsh7th/cmp-nvim-lsp",
+    },
 
     config = function()
-        require("mason").setup()
-
         local servers = {
             "clangd",
             "bashls",
@@ -74,8 +79,10 @@ return {
             end
 
             vim.lsp.config(server, opts)
-            vim.lsp.enable(server)
         end
+        -- Enable all at once: after startup each vim.lsp.enable() call re-runs
+        -- FileType for every open buffer.
+        vim.lsp.enable(servers)
 
         vim.diagnostic.config({
             virtual_text = false,

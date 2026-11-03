@@ -1,13 +1,13 @@
 -- plugins/none-ls.lua
 return {
     "nvimtools/none-ls.nvim",
+    -- Load right after the first screen is drawn (it used to be loaded before it).
+    -- When its sources are registered, none-ls attaches to the current buffer by itself.
+    event = "VeryLazy",
     dependencies = {
         "williamboman/mason.nvim",
         "jay-babu/mason-null-ls.nvim",
-        {
-            "nvimtools/none-ls-extras.nvim",
-            lazy = false,
-        },
+        "nvimtools/none-ls-extras.nvim", -- source modules only, loaded with none-ls
     },
     config = function()
         require("mason-null-ls").setup({
