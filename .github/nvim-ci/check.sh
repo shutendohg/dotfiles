@@ -2,7 +2,8 @@
 # Neovim checks of .github/workflows/dotfiles-ci.yml
 #
 #   check.sh sync     install/update the plugins (:Lazy! sync)
-#   check.sh startup  start Nvim with a few files and load every plugin
+#   check.sh startup  start Nvim with a few files, load every plugin and open
+#                     Telescope (its previewer only runs when a file is shown)
 #   check.sh health   run :checkhealth and check its report
 #
 # A check fails when Neovim or a plugin reports an error. In --headless mode

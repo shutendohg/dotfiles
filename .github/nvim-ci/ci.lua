@@ -166,6 +166,53 @@ function M.load_all()
 	log(("plugins loaded: %d of %d"):format(loaded, #lazy.plugins()))
 end
 
+--- Opens Telescope's find_files picker and waits for its previewer. The previewer only runs once a
+--- file is shown, so loading the plugins did not reveal that the previewer of telescope 0.1.8 calls
+--- APIs of nvim-treesitter's `master` branch, which `main` does not have.
+local function smoke_telescope()
+	if vim.fn.exists(":Telescope") ~= 2 then
+		return
+	end
+	-- the default layout hides the previewer below 120 columns (headless Nvim has 80)
+	vim.o.columns = 200
+	vim.o.lines = 50
+	local preview_buf
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "TelescopePreviewerLoaded",
+		once = true,
+		callback = function()
+			preview_buf = vim.api.nvim_get_current_buf()
+		end,
+	})
+	vim.cmd("Telescope find_files")
+	local shown = wait(10000, function()
+		return preview_buf ~= nil
+	end)
+	-- the file is read and highlighted in callbacks after that event
+	wait(2000)
+
+	local highlight = "-"
+	if shown and vim.api.nvim_buf_is_valid(preview_buf) then
+		highlight = vim.treesitter.highlighter.active[preview_buf] and "treesitter"
+			or vim.bo[preview_buf].syntax ~= "" and "syntax"
+			or "none"
+	end
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.bo[buf].filetype == "TelescopePrompt" then
+			local ok, err = pcall(require("telescope.actions").close, buf)
+			if not ok then
+				log("Telescope: could not close the picker: " .. tostring(err))
+			end
+		end
+	end
+
+	if shown then
+		log("Telescope: find_files showed a preview (highlight: " .. highlight .. ")")
+	else
+		log_error("Telescope: find_files showed no preview within 10s")
+	end
+end
+
 --- Start Neovim (with the files given on the command line), load every plugin and quit.
 function M.startup()
 	after_startup(function()
@@ -186,6 +233,7 @@ function M.startup()
 				)
 			end
 		end
+		smoke_telescope()
 		log("done: startup")
 	end)
 end
