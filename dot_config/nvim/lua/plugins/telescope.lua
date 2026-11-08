@@ -1,6 +1,8 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	tag = "0.1.8",
+	-- The latest release (v0.2+). The previewer of 0.1.8 highlights with the API of
+	-- nvim-treesitter's `master` branch and fails with its `main` branch (Nvim 0.12+).
+	version = "*",
 	event = "VeryLazy",
 	dependencies = { "nvim-lua/plenary.nvim" },
 	config = function()
