@@ -197,12 +197,18 @@ local function smoke_telescope()
 			or vim.bo[preview_buf].syntax ~= "" and "syntax"
 			or "none"
 	end
+	-- (closing the picker wipes its other buffers, so close it outside the loop)
+	local prompt_buf
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 		if vim.bo[buf].filetype == "TelescopePrompt" then
-			local ok, err = pcall(require("telescope.actions").close, buf)
-			if not ok then
-				log("Telescope: could not close the picker: " .. tostring(err))
-			end
+			prompt_buf = buf
+			break
+		end
+	end
+	if prompt_buf then
+		local ok, err = pcall(require("telescope.actions").close, prompt_buf)
+		if not ok then
+			log("Telescope: could not close the picker: " .. tostring(err))
 		end
 	end
 
