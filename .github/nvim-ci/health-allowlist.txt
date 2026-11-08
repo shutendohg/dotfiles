@@ -11,3 +11,8 @@
 
 # Headless Nvim has no terminal that could answer the graphics protocol query.
 ^vim\.health / Terminal: Graphics protocol: not supported by this terminal\.$
+
+# GitHub-hosted runners share their IP addresses, and with them the 60 GitHub API
+# requests per hour allowed without authentication: whether any are left depends
+# on the runner, not on the config.
+^mason / mason\.nvim \[GitHub\]: GitHub API rate limit exceeded\.
